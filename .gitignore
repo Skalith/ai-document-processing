@@ -1,0 +1,51 @@
+# Environment files
+.env
+.env.*
+
+# Python virtual environments
+venv/
+.venv/
+
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+
+# Node / frontend
+node_modules/
+frontend/node_modules/
+dist/
+frontend/dist/
+build/
+coverage/
+
+# IDE and OS files
+.vscode/
+.DS_Store
+
+# Project-generated files
+backend/storage/uploads/
+backend/storage/outputs/
+backend/storage/tmp/
+backend/.pytest_cache/
+
+# Local logs and runtime files
+*.log
+*.sqlite3
+*.db
+*.bak
+*.tmp
+
+# Media and large local files (optional, if you don't want to track them)
+*.pdf
+*.png
+*.jpg
+*.jpeg
+*.tiff
+*.bmp
+#pdf and output 
+
+backend/storage

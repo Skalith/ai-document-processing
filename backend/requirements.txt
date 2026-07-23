@@ -1,0 +1,46 @@
+# --- Core web framework ---
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+python-multipart==0.0.9        # required for file uploads via FastAPI
+pydantic==2.9.2
+pydantic-settings==2.5.2
+
+# --- File / image handling ---
+Pillow==10.4.0
+pdf2image==1.17.0              # requires poppler-utils installed on the OS
+python-magic==0.4.27           # mime-type sniffing for validation
+PyMuPDF==1.24.10               # (imported as `fitz`) native PDF text extraction
+                                # for machine-readable page detection (Step 2)
+
+# --- LLM classification + structured extraction ---
+anthropic==0.34.2              # Claude API client for document classification
+                                # and schema-based structured extraction
+                                # (Steps 4-7). Requires ANTHROPIC_API_KEY.
+
+# --- OCR engines ---
+pytesseract==0.3.13            # requires tesseract-ocr installed on the OS
+easyocr==1.7.2
+paddlepaddle==2.6.2
+paddleocr==2.8.1
+docling==2.7.0
+
+# --- Layout-aware reading order (multi-column sorting) ---
+# torch/torchvision are CPU wheels here; swap for a CUDA build if you have a GPU.
+torch==2.4.1
+torchvision==0.19.1
+layoutparser==0.3.4
+opencv-python==4.10.0.84       # required by layoutparser's visualization/IO utils
+# Detectron2 has no official PyPI wheel; install it directly from source,
+# matching it to the torch version above, e.g.:
+#   pip install "git+https://github.com/facebookresearch/detectron2.git@v0.6"
+# If Detectron2 isn't installed, layout_service.py fails soft and every
+# OCR engine automatically falls back to its original whole-page behaviour.
+
+# --- Output formatting helpers ---
+markdown2==2.5.0
+jinja2==3.1.4
+
+# --- Misc utilities ---
+aiofiles==24.1.0
+python-dotenv==1.0.1
+loguru==0.7.2
