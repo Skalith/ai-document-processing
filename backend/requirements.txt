@@ -2,7 +2,7 @@
 fastapi==0.115.0
 uvicorn[standard]==0.30.6
 python-multipart==0.0.9        # required for file uploads via FastAPI
-pydantic==2.9.2
+pydantic==2.13.5
 pydantic-settings==2.5.2
 
 # --- File / image handling ---
@@ -13,9 +13,13 @@ PyMuPDF==1.24.10               # (imported as `fitz`) native PDF text extraction
                                 # for machine-readable page detection (Step 2)
 
 # --- LLM classification + structured extraction ---
-anthropic==0.34.2              # Claude API client for document classification
-                                # and schema-based structured extraction
-                                # (Steps 4-7). Requires ANTHROPIC_API_KEY.
+# Multi-provider chain (priority: gemini -> groq -> nvidia -> omniroute -> anthropic).
+# A provider is used only when its API key is set; failures fail over to the next one.
+anthropic==0.34.2              # Anthropic Messages API (last in priority chain)
+google-genai==2.22.0           # Gemini provider
+openai==3.9.0                  # OpenAI-compatible clients: Groq, NVIDIA NIM, Omniroute
+langfuse==4.15.1               # Observability: traces every LLM call (model,
+                                # tokens, latency). Optional - no-op without keys.
 
 # --- OCR engines ---
 pytesseract==0.3.13            # requires tesseract-ocr installed on the OS

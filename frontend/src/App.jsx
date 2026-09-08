@@ -2,14 +2,17 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import CssBaseline from "@mui/material/CssBaseline";
 import { ThemeProvider } from "@mui/material/styles";
 
-import { theme } from "./theme";
+import { getTheme } from "./theme";
+import { ThemePreferenceProvider, useThemePreference } from "./context/ThemeContext";
 import { ExtractionProvider } from "./context/ExtractionContext";
 import UploadPage from "./pages/Landing/UploadPage";
 import ResultPage from "./pages/Results/ResultPage";
 
-export default function App() {
+function AppContent() {
+  const { themeId } = useThemePreference();
+
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={getTheme(themeId)}>
       <CssBaseline />
       <ExtractionProvider>
         <BrowserRouter>
@@ -21,5 +24,13 @@ export default function App() {
         </BrowserRouter>
       </ExtractionProvider>
     </ThemeProvider>
+  );
+}
+
+export default function App() {
+  return (
+    <ThemePreferenceProvider>
+      <AppContent />
+    </ThemePreferenceProvider>
   );
 }

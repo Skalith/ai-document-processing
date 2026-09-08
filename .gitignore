@@ -34,6 +34,7 @@ backend/.pytest_cache/
 
 # Local logs and runtime files
 *.log
+logs/
 *.sqlite3
 *.db
 *.bak
@@ -49,3 +50,13 @@ backend/.pytest_cache/
 #pdf and output 
 
 backend/storage
+weakness.md
+working.md
+start.sh
+
+
+
+
+
+
+

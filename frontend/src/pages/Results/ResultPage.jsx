@@ -11,6 +11,7 @@ import AutoAwesomeRoundedIcon from "@mui/icons-material/AutoAwesomeRounded";
 
 import OriginalDocumentViewer from "../../components/ResultsViewer/OriginalDocumentViewer";
 import ExtractedOutputViewer from "../../components/ResultsViewer/ExtractedOutputViewer";
+import ThemeButton from "../../components/Theme/ThemeButton";
 import { useExtraction } from "../../context/ExtractionContext";
 import { resolveFileUrl, resolveDownloadUrl } from "../../services/api";
 import { OCR_ENGINES, DOCUMENT_TYPE_LABELS } from "../../utils/constants";
@@ -101,16 +102,19 @@ export default function ResultPage() {
           <Chip label={`${extraction.processing_time_seconds}s`} size="small" variant="outlined" />
         </Stack>
 
-        <Button
-          variant="outlined"
-          size="small"
-          startIcon={<DownloadRoundedIcon />}
-          component="a"
-          href={downloadUrl}
-          download
-        >
-          Download output
-        </Button>
+        <Stack direction="row" spacing={1} alignItems="center">
+          <ThemeButton />
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={<DownloadRoundedIcon />}
+            component="a"
+            href={downloadUrl}
+            download
+          >
+            Download output
+          </Button>
+        </Stack>
       </Stack>
 
       <Box

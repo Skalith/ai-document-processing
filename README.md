@@ -128,8 +128,7 @@ source venv/bin/activate          # venv\Scripts\activate on Windows
 pip install -r requirements.txt
 cp .env.example .env               # adjust values as needed
 
-uvicorn app.main:app --reload --port 8000
-```
+uvicorn app.main:app --reload --port 8000```
 
 The interactive APilable at `http://localhost:8000/docs`.
 
@@ -164,3 +163,4 @@ npm run dev
 
 Full request/response schemas are enforced by Pydantic (`app/models/schemas.py`)
 and are viewable live in the auto-generated `/docs` page.
+

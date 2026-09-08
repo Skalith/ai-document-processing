@@ -37,6 +37,16 @@ class ProcessingStatus(str, Enum):
     FAILED = "failed"
 
 
+class JobStatus(str, Enum):
+    """Lifecycle of an asynchronous extraction job (see app/services/jobs.py)."""
+
+    QUEUED = "queued"
+    PROCESSING = "processing"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    CANCELLED = "cancelled"
+
+
 class DocumentType(str, Enum):
     """
     Document categories the LLM classifier can assign. ``OTHER`` is the
@@ -120,3 +130,24 @@ class ExtractResponse(BaseModel):
 class ErrorResponse(BaseModel):
     detail: str
     status_code: int
+
+
+# --------------------------------------------------------------------------
+# Async extraction job (progress + cancel)
+# --------------------------------------------------------------------------
+
+class ExtractJobResponse(BaseModel):
+    """Snapshot returned by the job endpoints while extraction is running."""
+
+    job_id: str
+    file_id: str
+    status: JobStatus
+    progress: int = Field(ge=0, le=100, description="0-100 progress percentage")
+    stage: str = Field(..., description="Human-readable current pipeline stage")
+    created_at: datetime
+    error: str | None = Field(
+        default=None, description="Set when status is 'failed'"
+    )
+    result: ExtractResponse | None = Field(
+        default=None, description="Populated only when status is 'completed'"
+    )

@@ -33,18 +33,42 @@ export async function uploadDocument(file, { onUploadProgress } = {}) {
 }
 
 /**
- * POST /api/extract  (application/json)
+ * POST /api/extract  (application/json) - ASYNC.
  * Backend: app.routers.extract.extract_document
  * Body shape must match ExtractRequest exactly: { file_id, ocr_engine, output_format }
- * Returns ExtractResponse: { result_id, file_id, ocr_engine, output_format,
- *   status, pages[], formatted_output, download_url, processing_time_seconds, created_at }
+ * Returns 202 ExtractJobResponse: { job_id, file_id, status, progress, stage,
+ *   created_at, error, result }
+ *
+ * The pipeline now runs in the background; poll getExtractionJob(jobId)
+ * until status becomes completed/failed/cancelled.
  */
-export async function extractDocument({ fileId, ocrEngine, outputFormat }) {
+export async function startExtraction({ fileId, ocrEngine, outputFormat }) {
   const { data } = await api.post("/extract", {
     file_id: fileId,
     ocr_engine: ocrEngine,
     output_format: outputFormat,
   });
+  return data;
+}
+
+/**
+ * GET /api/extract/jobs/{jobId}
+ * Backend: app.routers.extract.get_job
+ * Returns ExtractJobResponse. When status === "completed", `result` holds
+ * the full ExtractResponse (pages, formatted_output, structured_data, ...).
+ */
+export async function getExtractionJob(jobId) {
+  const { data } = await api.get(`/extract/jobs/${jobId}`);
+  return data;
+}
+
+/**
+ * POST /api/extract/jobs/{jobId}/cancel
+ * Backend: app.routers.extract.cancel_job
+ * Requests the running pipeline to stop at its next checkpoint.
+ */
+export async function cancelExtraction(jobId) {
+  const { data } = await api.post(`/extract/jobs/${jobId}/cancel`);
   return data;
 }
 
