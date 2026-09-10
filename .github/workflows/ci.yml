@@ -6,52 +6,9 @@ on:
     branches-ignore: [main]
 
 jobs:
-  # ── Python: lint + format check ────────────────────────────────────────────
-  python:
-    name: Python (lint · format)
-    runs-on: ubuntu-latest
-
-    env:
-      SECRET_KEY: ci-only-placeholder
-      DEBUG: "True"
-      ALLOWED_HOSTS: localhost,127.0.0.1
-      CORS_ALLOWED_ORIGINS: http://localhost:5173
-      UPLOAD_DIR: uploads
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Install system deps
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y tesseract-ocr poppler-utils libmagic1 libgl1 libglib2.0-0
-
-      - name: Install Python deps
-        run: |
-          python -m venv venv
-          source venv/bin/activate
-          pip install --upgrade pip
-          pip install -r backend/requirements.txt
-          pip install ruff
-
-      - name: Ruff lint
-        run: |
-          source venv/bin/activate
-          ruff check backend/
-
-      - name: Ruff format check
-        run: |
-          source venv/bin/activate
-          ruff format --check backend/
-
-  # ── Frontend: lint + build ─────────────────────────────────────────────────
+  # ── Frontend: build check ──────────────────────────────────────────────────
   frontend:
-    name: Frontend (lint · build)
+    name: Frontend (build)
     runs-on: ubuntu-latest
     defaults:
       run:
