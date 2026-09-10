@@ -1,0 +1,15 @@
+.git
+.gitignore
+.github
+*.md
+!README.md
+start.sh
+deploy.sh
+logs/
+backend/venv/
+backend/.env
+backend/__pycache__/
+backend/storage/
+frontend/node_modules/
+frontend/dist/
+frontend/.env

@@ -5,6 +5,10 @@ import Typography from "@mui/material/Typography";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Chip from "@mui/material/Chip";
+import Button from "@mui/material/Button";
+import Tooltip from "@mui/material/Tooltip";
+import EditRoundedIcon from "@mui/icons-material/EditRounded";
+import ReplayRoundedIcon from "@mui/icons-material/ReplayRounded";
 import ReactMarkdown from "react-markdown";
 import { DOCUMENT_TYPE_LABELS } from "../../utils/constants";
 
@@ -20,6 +24,10 @@ export default function ExtractedOutputViewer({
   ocrEngine,
   documentType,
   usedStructuredExtraction,
+  structuredData,
+  onRequestEdit,
+  savedUserChangeCount,
+  onResetToAI,
 }) {
   // Markdown and HTML can be viewed either rendered or as the raw text the
   // backend produced. JSON has no separate "rendered" mode — the formatted,
@@ -29,6 +37,9 @@ export default function ExtractedOutputViewer({
   const documentTypeLabel = documentType
     ? DOCUMENT_TYPE_LABELS[documentType] || documentType
     : null;
+
+  const editable = structuredData !== null && structuredData !== undefined;
+  const hasSavedUserResult = Number.isFinite(savedUserChangeCount) && savedUserChangeCount >= 0;
 
   return (
     <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
@@ -62,20 +73,60 @@ export default function ExtractedOutputViewer({
                 sx={{ height: 20 }}
               />
             )}
+            {hasSavedUserResult && (
+              <Chip
+                label={`${savedUserChangeCount} correction${savedUserChangeCount === 1 ? "" : "s"} saved`}
+                size="small"
+                color="warning"
+                variant="filled"
+                sx={{ height: 20, fontSize: 11 }}
+              />
+            )}
           </Stack>
         </Box>
 
-        {supportsToggle && (
-          <ToggleButtonGroup
-            size="small"
-            exclusive
-            value={viewMode}
-            onChange={(_, next) => next && setViewMode(next)}
-          >
-            <ToggleButton value="preview">Preview</ToggleButton>
-            <ToggleButton value="raw">Raw</ToggleButton>
-          </ToggleButtonGroup>
-        )}
+        <Stack direction="row" spacing={1} alignItems="center">
+          {supportsToggle && (
+            <ToggleButtonGroup
+              size="small"
+              exclusive
+              value={viewMode}
+              onChange={(_, next) => next && setViewMode(next)}
+            >
+              <ToggleButton value="preview">Preview</ToggleButton>
+              <ToggleButton value="raw">Raw</ToggleButton>
+            </ToggleButtonGroup>
+          )}
+          {editable && (
+            <Tooltip
+              title={
+                editable
+                  ? "Edit the structured fields extracted by AI"
+                  : "Not editable — AI structured output unavailable"
+              }
+            >
+              <Button
+                size="small"
+                variant="outlined"
+                startIcon={<EditRoundedIcon />}
+                onClick={onRequestEdit}
+                disabled={!editable}
+              >
+                Edit Result
+              </Button>
+            </Tooltip>
+          )}
+          {hasSavedUserResult && (
+            <Button
+              size="small"
+              startIcon={<ReplayRoundedIcon />}
+              color="inherit"
+              onClick={onResetToAI}
+            >
+              Reset to AI Result
+            </Button>
+          )}
+        </Stack>
       </Stack>
 
       <Box sx={{ flexGrow: 1, minHeight: 0, overflow: "auto", bgcolor: "background.paper" }}>

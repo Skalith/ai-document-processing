@@ -5,6 +5,7 @@ import { ThemeProvider } from "@mui/material/styles";
 import { getTheme } from "./theme";
 import { ThemePreferenceProvider, useThemePreference } from "./context/ThemeContext";
 import { ExtractionProvider } from "./context/ExtractionContext";
+import { UserResultProvider } from "./context/UserResultContext";
 import UploadPage from "./pages/Landing/UploadPage";
 import ResultPage from "./pages/Results/ResultPage";
 
@@ -15,13 +16,15 @@ function AppContent() {
     <ThemeProvider theme={getTheme(themeId)}>
       <CssBaseline />
       <ExtractionProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<UploadPage />} />
-            <Route path="/result" element={<ResultPage />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </BrowserRouter>
+        <UserResultProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<UploadPage />} />
+              <Route path="/result" element={<ResultPage />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </BrowserRouter>
+        </UserResultProvider>
       </ExtractionProvider>
     </ThemeProvider>
   );

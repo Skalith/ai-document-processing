@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
@@ -11,14 +12,27 @@ import AutoAwesomeRoundedIcon from "@mui/icons-material/AutoAwesomeRounded";
 
 import OriginalDocumentViewer from "../../components/ResultsViewer/OriginalDocumentViewer";
 import ExtractedOutputViewer from "../../components/ResultsViewer/ExtractedOutputViewer";
+import VerifyModeBar from "../../components/ResultEditor/VerifyModeBar";
+import FieldEditor from "../../components/ResultEditor/FieldEditor";
 import ThemeButton from "../../components/Theme/ThemeButton";
 import { useExtraction } from "../../context/ExtractionContext";
+import { useUserResult } from "../../context/UserResultContext";
 import { resolveFileUrl, resolveDownloadUrl } from "../../services/api";
 import { OCR_ENGINES, DOCUMENT_TYPE_LABELS } from "../../utils/constants";
+import {
+  applyEdit,
+  diffChanges,
+  rebuildUserResult,
+  deepClone,
+} from "../../components/ResultEditor/changeTracker";
 
 export default function ResultPage() {
   const navigate = useNavigate();
   const { session, clearSession } = useExtraction();
+  const { userResultFor, saveUserResult, resetUserResult } = useUserResult();
+
+  const [editMode, setEditMode] = useState(false);
+  const [draft, setDraft] = useState(null); // working copy while editing
 
   if (!session) {
     return (
@@ -53,10 +67,49 @@ export default function ResultPage() {
     ? DOCUMENT_TYPE_LABELS[extraction.document_type] || extraction.document_type
     : null;
 
+  const aiStructured = extraction.structured_data ?? null;
+  const savedUserResult = userResultFor(extraction.result_id);
+  const savedChangeCount = savedUserResult?.changes?.length ?? 0;
+
+  // ----------------- Human-in-the-loop edit handlers --------------------
+
+  const handleStartEdit = () => {
+    if (aiStructured === null) return; // button disabled; guard for robustness
+    const startingPoint = savedUserResult?.structured_data ?? aiStructured;
+    setDraft(deepClone(startingPoint));
+    setEditMode(true);
+  };
+
+  const handleFieldChange = (path, value) => {
+    setDraft((current) => (current ? applyEdit(current, path, value) : current));
+  };
+
+  const handleSave = () => {
+    if (draft == null) return;
+    const userResult = rebuildUserResult(aiStructured, draft);
+    saveUserResult(extraction.result_id, userResult);
+    setDraft(null);
+    setEditMode(false);
+  };
+
+  const handleCancelEdit = () => {
+    setDraft(null);
+    setEditMode(false);
+  };
+
+  const handleResetToAI = () => {
+    resetUserResult();
+    setDraft(null);
+    setEditMode(false);
+  };
+
   const handleNewExtraction = () => {
     clearSession();
     navigate("/");
   };
+
+  const changeCount = draft ? diffChanges(aiStructured, draft).length : 0;
+  const showSavedBadge = !editMode && savedChangeCount > 0;
 
   return (
     <Box sx={{ height: "100vh", display: "flex", flexDirection: "column", bgcolor: "background.default" }}>
@@ -142,13 +195,53 @@ export default function ResultPage() {
         </Box>
 
         <Box sx={{ width: { xs: "100%", md: "50%" }, height: { xs: "50%", md: "100%" } }}>
-          <ExtractedOutputViewer
-            outputFormat={extraction.output_format}
-            formattedOutput={extraction.formatted_output}
-            ocrEngine={extraction.ocr_engine}
-            documentType={extraction.document_type}
-            usedStructuredExtraction={extraction.used_structured_extraction}
-          />
+          {editMode ? (
+            <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
+              <VerifyModeBar
+                changeCount={changeCount}
+                onSave={handleSave}
+                onCancel={handleCancelEdit}
+              />
+              {aiStructured === null ? (
+                <Box
+                  sx={{ p: 3, display: "flex", alignItems: "center", justifyContent: "center", flexGrow: 1 }}
+                >
+                  <Typography variant="body1" color="text.secondary">
+                    Not editable — AI structured output unavailable.
+                  </Typography>
+                </Box>
+              ) : (
+                <Box
+                  sx={{
+                    flexGrow: 1,
+                    minHeight: 0,
+                    overflow: "auto",
+                    bgcolor: "background.paper",
+                    p: 2.5,
+                  }}
+                >
+                  <FieldEditor
+                    value={draft}
+                    aiValue={aiStructured}
+                    path=""
+                    onEdit={handleFieldChange}
+                  />
+                </Box>
+              )}
+            </Box>
+          ) : (
+            <ExtractedOutputViewer
+              outputFormat={extraction.output_format}
+              formattedOutput={extraction.formatted_output}
+              ocrEngine={extraction.ocr_engine}
+              documentType={extraction.document_type}
+              usedStructuredExtraction={extraction.used_structured_extraction}
+              structuredData={aiStructured}
+              onRequestEdit={handleStartEdit}
+              savedUserChangeCount={showSavedBadge ? savedChangeCount : undefined}
+              onResetToAI={handleResetToAI}
+            />
+          )}
         </Box>
       </Box>
     </Box>
