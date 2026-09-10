@@ -91,12 +91,14 @@ jobs:
           script: |
             set -e
             echo "=== Deploying DocExtract ==="
-            cd /home/ubuntu/ai-document-processing
+            APP_DIR=/home/ubuntu/ai-document-processing
+            mkdir -p "$APP_DIR"
 
             # First-time: clone if folder missing
-            if [ ! -d .git ]; then
-              git clone https://github.com/Skalith/ai-document-processing.git .
+            if [ ! -d "$APP_DIR/.git" ]; then
+              git clone https://github.com/Skalith/ai-document-processing.git "$APP_DIR"
             fi
+            cd "$APP_DIR"
 
             git pull origin main
 
